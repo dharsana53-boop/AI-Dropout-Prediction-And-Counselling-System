@@ -77,7 +77,7 @@ def register_user():
 @app.route('/login', methods=['POST'])
 def login():
 
-    email = request.form['username']
+    email = request.form['email']
     password = request.form['password']
 
     conn = sqlite3.connect("dropout.db")
