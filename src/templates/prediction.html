@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prediction Report</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            padding: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg,
+                    #1e3a8a,
+                    #2563eb);
+
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .header p {
+            margin-top: 10px;
+        }
+
+        .header h1 {
+            font-size: 34px;
+        }
+
+        .header p {
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .info-box h3 {
+            color: #2563EB;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .high {
+            color: #ef4444;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .medium {
+            color: #f59e0b;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .low {
+            color: #10b981;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .progress {
+            width: 100%;
+            height: 25px;
+            background: #e5e7eb;
+            border-radius: 30px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .high-fill {
+            width: 30%;
+            height: 100%;
+            background: #ef4444;
+        }
+
+        .medium-fill {
+            width: 60%;
+            height: 100%;
+            background: #f59e0b;
+        }
+
+        .low-fill {
+            width: 90%;
+            height: 100%;
+            background: #10b981;
+        }
+
+
+
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 25px;
+            margin: 10px;
+            text-decoration: none;
+            color: white;
+            border-radius: 10px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #2563EB, #1E3A8A);
+            transition: .3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        @media(max-width:768px) {
+
+            .student-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🎓 AI Dropout Prediction Report</h1>
+        <p>Student Performance Risk Analysis Dashboard</p>
+    </div>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h2>👤 Student Profile</h2>
+
+            <div class="student-grid">
+
+                <div class="info-box">
+                    <h3>Name</h3>
+                    <p>{{ student[1] }}</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>Department</h3>
+                    <p>{{ student[3] }}</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>CGPA</h3>
+                    <p>{{ student[4] }}</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>Attendance</h3>
+                    <p>{{ student[5] }}%</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h2>🤖 AI Prediction Result</h2>
+
+            {% if risk == "High Risk" %}
+
+            <p class="high">🔴 HIGH RISK</p>
+
+            <div class="progress">
+                <div class="high-fill"></div>
+            </div>
+
+            <p style="margin-top:10px;">
+                Performance Score : 30%
+            </p>
+
+            {% elif risk == "Medium Risk" %}
+
+            <p class="medium">🟡 MEDIUM RISK</p>
+
+            <div class="progress">
+                <div class="medium-fill"></div>
+            </div>
+
+            <p style="margin-top:10px;">
+                Performance Score : 60%
+            </p>
+
+            {% else %}
+
+            <p class="low">🟢 LOW RISK</p>
+
+            <div class="progress">
+                <div class="low-fill"></div>
+            </div>
+
+            <p style="margin-top:10px;">
+                Performance Score : 90%
+            </p>
+
+            {% endif %}
+
+
+
+        </div>
+
+        <div class="buttons">
+
+            {% if risk != "Low Risk" %}
+            <a href="/counselling/{{ risk }}" class="btn">
+                📋 View Counselling Recommendations
+            </a>
+            {% endif %}
+
+            <a href="/dashboard" class="btn">
+                🏠 Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+```

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dropout Prediction Dashboard</title>
+
+    <style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:
+    radial-gradient(circle at top left,
+    rgba(96,165,250,0.20), transparent 30%),
+
+    radial-gradient(circle at bottom right,
+    rgba(59,130,246,0.15), transparent 30%),
+
+    linear-gradient(
+        135deg,
+        #0f172a,
+        #1e3a8a,
+        #2563eb
+    );
+
+    background-attachment:fixed;
+    padding:25px;
+}
+
+/* HEADER */
+
+.header{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.header h1{
+    color:white;
+    font-size:42px;
+    font-weight:700;
+    text-shadow:0 4px 15px rgba(0,0,0,0.3);
+}
+
+.header p{
+    color:#dbeafe;
+    margin-top:10px;
+    font-size:17px;
+}
+
+/* MENU */
+
+.menu{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+}
+
+.menu a{
+    text-decoration:none;
+    color:white;
+    padding:12px 22px;
+    border-radius:12px;
+    font-weight:600;
+    transition:0.3s;
+    background:linear-gradient(135deg,#3b82f6,#2563eb);
+    box-shadow:0 5px 15px rgba(37,99,235,0.35);
+}
+
+.menu a:hover{
+    transform:translateY(-3px) scale(1.05);
+}
+
+.dashboard-btn{
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+}
+
+.admin-btn{
+    background:linear-gradient(
+        135deg,
+        #f59e0b,
+        #d97706
+    );
+}
+
+.history-btn{
+    background:linear-gradient(
+        135deg,
+        #9333ea,
+        #7e22ce
+    );
+}
+
+.logout-btn{
+    background:linear-gradient(
+        135deg,
+        #ef4444,
+        #dc2626
+    );
+}
+
+/* WELCOME BOX */
+
+.welcome{
+    background:rgba(255,255,255,0.96);
+    border-radius:20px;
+    padding:22px;
+    margin-bottom:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.18);
+}
+
+.welcome h2{
+    color:#1e3a8a;
+    margin-bottom:8px;
+}
+
+.welcome p{
+    color:#64748b;
+}
+
+/* CARDS */
+
+.card{
+    background:rgba(255,255,255,0.97);
+    border-radius:22px;
+    padding:25px;
+    margin-bottom:25px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.18);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+}
+
+.card h2{
+    color:#1e3a8a;
+    margin-bottom:20px;
+}
+
+/* INPUTS */
+
+input{
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:12px;
+    background:#f1f5f9;
+    font-size:15px;
+}
+
+input:focus{
+    outline:none;
+    box-shadow:0 0 0 3px rgba(37,99,235,0.2);
+}
+
+/* ADD STUDENT BUTTON */
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+    color:white;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+/* SEARCH BOX */
+
+.search-box{
+    width:100%;
+    padding:14px;
+    margin-bottom:20px;
+    border:none;
+    border-radius:12px;
+    background:#f1f5f9;
+}
+
+/* TABLE */
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:15px;
+}
+
+th{
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #1d4ed8
+    );
+    color:white;
+    padding:15px;
+}
+
+td{
+    padding:15px;
+    text-align:center;
+    color:#1f2937;
+    border-bottom:1px solid #e5e7eb;
+}
+
+tr:nth-child(even){
+    background:#f8fafc;
+}
+
+tr:hover{
+    background:#dbeafe;
+}
+
+/* PREDICT BUTTON */
+
+.predict-btn{
+    display:inline-block;
+    text-decoration:none;
+    background:linear-gradient(
+        135deg,
+        #22c55e,
+        #16a34a
+    );
+    color:white;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.predict-btn:hover{
+    transform:translateY(-2px);
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    body{
+        padding:15px;
+    }
+
+    .header h1{
+        font-size:30px;
+    }
+
+    table{
+        font-size:13px;
+    }
+
+    th,
+    td{
+        padding:10px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🎓 AI Dropout Prediction & Counselling System</h1>
+        <p>Smart Student Risk Analysis Dashboard</p>
+    </div>
+
+    <div class="menu">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/admin">Admin</a>
+        <a href="/history">History</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="welcome">
+        <h2>Welcome 👋</h2>
+        <p>Date : {{ current_date }}</p>
+    </div>
+
+    <div class="card">
+
+        <h2>➕ Add Student</h2>
+
+        <form action="/add_student" method="POST">
+
+            <input type="text" name="name" placeholder="Student Name" required>
+
+            <input type="number" name="age" placeholder="Age" required>
+
+            <input type="text" name="department" placeholder="Department" required>
+
+            <input type="number" step="0.01" name="cgpa" placeholder="CGPA" required>
+
+            <input type="number" step="0.01" name="attendance" placeholder="Attendance %" required>
+
+            <button type="submit">Add Student</button>
+
+        </form>
+
+    </div>
+
+    <div class="card">
+
+        <h2>📋 Student Records</h2>
+
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search Student..."
+            onkeyup="searchTable()">
+
+        <table id="studentTable">
+
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>CGPA</th>
+                <th>Attendance</th>
+                <th>Prediction</th>
+            </tr>
+
+            {% for student in students %}
+
+            <tr>
+                <td>{{ student[0] }}</td>
+                <td>{{ student[1] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>{{ student[4] }}</td>
+                <td>{{ student[5] }}%</td>
+
+                <td>
+                    <a href="/predict/{{student[0]}}" class="predict-btn">
+                        Predict Risk
+                    </a>
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+    <script>
+        function searchTable() {
+
+            let input = document.getElementById("searchInput");
+            let filter = input.value.toLowerCase();
+
+            let table = document.getElementById("studentTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+
+                let td = tr[i].getElementsByTagName("td")[1];
+
+                if (td) {
+
+                    let txtValue = td.textContent || td.innerText;
+
+                    tr[i].style.display =
+                        txtValue.toLowerCase().indexOf(filter) > -1
+                            ? ""
+                            : "none";
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>

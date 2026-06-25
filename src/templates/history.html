@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction History</title>
+
+    <style>
+        /* PAGE */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            padding: 30px;
+        }
+
+        /* HEADER */
+        .header {
+            background: #1e3a8a;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 34px;
+        }
+
+        .filter-box {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            font-size: 15px;
+            background: white;
+            outline: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* TABLE CONTAINER */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ROW STYLE */
+        .table-row {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 12px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+
+            transition: 0.3s ease;
+        }
+
+        /* HOVER EFFECT */
+        .table-row:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        /* COLUMNS */
+        .col {
+            flex: 1;
+            text-align: center;
+            font-size: 15px;
+            color: #111827;
+        }
+
+        /* NAME LEFT ALIGN */
+        .name {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        /* DATE RIGHT ALIGN */
+        .date {
+            text-align: right;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* BADGE */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* RISK COLORS */
+        .high {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .medium {
+            background: #fef9c3;
+            color: #92400e;
+            border: 1px solid #facc15;
+        }
+
+        .low {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #22c55e;
+        }
+
+        /* BACK BUTTON */
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 20px;
+            background: #1e3a8a;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>📊 Prediction History</h1>
+    </div>
+    <select id="riskFilter" class="filter-box" onchange="filterRisk()">
+        <option value="all">🔎 All Risks</option>
+        <option value="High Risk">🔴 High Risk</option>
+        <option value="Medium Risk">🟡 Medium Risk</option>
+        <option value="Low Risk">🟢 Low Risk</option>
+    </select>
+    <!-- TABLE HEADER STYLE ROW (optional visual guide) -->
+    <div class="table-row" style="font-weight:bold; background:#e0e7ff;">
+        <div class="col name">Name</div>
+        <div class="col">Risk Level</div>
+        <div class="col date">Date & Time</div>
+    </div>
+
+    <!-- DATA ROWS -->
+    <div class="table-container">
+
+        {% for row in records %}
+
+        <div class="table-row">
+
+            <div class="col name">
+                {{ row[0] }}
+            </div>
+
+            <div class="col">
+                {% if row[1] == 'High Risk' %}
+                <span class="badge high">🔴 {{ row[1] }}</span>
+
+                {% elif row[1] == 'Medium Risk' %}
+                <span class="badge medium">🟡 {{ row[1] }}</span>
+
+                {% else %}
+                <span class="badge low">🟢 {{ row[1] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="col date">
+                📅 {{ row[2] }}
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- BACK BUTTON -->
+    <a href="/dashboard" class="btn">← Back to Dashboard</a>
+    <script>
+        function filterRisk() {
+
+            let value = document.getElementById("riskFilter").value;
+            let rows = document.getElementsByClassName("table-row");
+
+            for (let i = 1; i < rows.length; i++) { // skip header row
+
+                let badge = rows[i].querySelector(".badge");
+
+                if (!badge) continue;
+
+                let risk = badge.innerText;
+
+                if (value === "all" || risk.includes(value)) {
+                    rows[i].style.display = "flex";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
