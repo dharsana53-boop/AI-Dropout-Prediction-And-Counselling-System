@@ -1,18 +1,37 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
+import psycopg2
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "dropout_project_key"
 
 
-def init_db():
-    conn = sqlite3.connect("dropout.db")
-    c = conn.cursor()
+# ---------------- DB CONNECTION ----------------
+def get_db_connection():
+    try:
+        db_url = os.environ.get("DATABASE_URL")
+        if not db_url:
+            raise Exception("DATABASE_URL not set in Render")
 
-    c.execute("""
+        return psycopg2.connect(db_url)
+
+    except Exception as e:
+        print("DB Connection Error:", e)
+        return None
+
+# ---------------- INIT DB ----------------
+def init_db():
+     conn = get_db_connection()
+
+     if not conn:
+        return "DB not available"
+
+     c = conn.cursor()
+
+     c.execute("""
     CREATE TABLE IF NOT EXISTS students(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         name TEXT,
         age INTEGER,
         department TEXT,
@@ -21,29 +40,37 @@ def init_db():
     )
     """)
 
-    c.execute("""
+     c.execute("""
     CREATE TABLE IF NOT EXISTS predictions(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         student_id INTEGER,
         risk_level TEXT,
         prediction_date TEXT
     )
     """)
 
-    c.execute("""
+     c.execute("""
     CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         email TEXT UNIQUE,
         password TEXT
     )
     """)
 
-    conn.commit()
-    conn.close()
+     conn.commit()
+     conn.close()
 
 
-init_db()
+# Run DB init once
+def safe_init_db():
+    try:
+        init_db()
+    except Exception as e:
+        print("Database init skipped:", e)
 
+
+
+# ---------------- ROUTES ----------------
 
 @app.route('/')
 def home():
@@ -55,16 +82,21 @@ def register():
     return render_template('register.html')
 
 
+# -------- REGISTER USER --------
 @app.route('/register_user', methods=['POST'])
 def register_user():
     email = request.form['email']
     password = request.form['password']
 
-    conn = sqlite3.connect("dropout.db")
+    conn = get_db_connection()
+
+    if not conn:
+       return "DB not available"
+
     c = conn.cursor()
 
     c.execute(
-        "INSERT INTO users(email, password) VALUES(?, ?)",
+        "INSERT INTO users(email, password) VALUES(%s, %s)",
         (email, password)
     )
 
@@ -74,22 +106,24 @@ def register_user():
     return redirect('/')
 
 
+# -------- LOGIN --------
 @app.route('/login', methods=['POST'])
 def login():
-
     email = request.form['email']
     password = request.form['password']
 
-    conn = sqlite3.connect("dropout.db")
-    c = conn.cursor()
+    conn = get_db_connection()
 
+    if not conn:
+       return "DB not available"
+
+    c = conn.cursor()
     c.execute(
-        "SELECT * FROM users WHERE email=? AND password=?",
-        (email,password)
+        "SELECT * FROM users WHERE email=%s AND password=%s",
+        (email, password)
     )
 
     user = c.fetchone()
-
     conn.close()
 
     if user:
@@ -98,9 +132,15 @@ def login():
 
     return "Invalid Email or Password"
 
+
+# -------- DASHBOARD --------
 @app.route('/dashboard')
 def dashboard():
-    conn = sqlite3.connect("dropout.db")
+    conn = get_db_connection()
+
+    if not conn:
+       return "DB not available"
+ 
     c = conn.cursor()
 
     c.execute("SELECT * FROM students")
@@ -111,11 +151,13 @@ def dashboard():
     current_date = datetime.now().strftime("%d-%m-%Y")
 
     return render_template(
-       "dashboard.html",
-       students=students,
-       current_date=current_date
-)
+        "dashboard.html",
+        students=students,
+        current_date=current_date
+    )
 
+
+# -------- ADD STUDENT --------
 @app.route('/add_student', methods=['POST'])
 def add_student():
     name = request.form['name']
@@ -124,11 +166,15 @@ def add_student():
     cgpa = float(request.form['cgpa'])
     attendance = float(request.form['attendance'])
 
-    conn = sqlite3.connect("dropout.db")
-    c = conn.cursor()
+    conn = get_db_connection()
+
+    if not conn:
+        return "DB not available"
+
+    c = conn.cursor() 
 
     c.execute(
-        "INSERT INTO students(name, age, department, cgpa, attendance) VALUES(?,?,?,?,?)",
+        "INSERT INTO students(name, age, department, cgpa, attendance) VALUES(%s,%s,%s,%s,%s)",
         (name, age, department, cgpa, attendance)
     )
 
@@ -138,12 +184,17 @@ def add_student():
     return redirect('/dashboard')
 
 
+# -------- PREDICT --------
 @app.route('/predict/<int:id>')
 def predict(id):
-    conn = sqlite3.connect("dropout.db")
+    conn = get_db_connection()
+
+    if not conn:
+     return "DB not available"
+
     c = conn.cursor()
 
-    c.execute("SELECT * FROM students WHERE id=?", (id,))
+    c.execute("SELECT * FROM students WHERE id=%s", (id,))
     student = c.fetchone()
 
     attendance = student[5]
@@ -157,7 +208,7 @@ def predict(id):
         risk = "Low Risk"
 
     c.execute(
-        "INSERT INTO predictions(student_id, risk_level, prediction_date) VALUES(?,?,?)",
+        "INSERT INTO predictions(student_id, risk_level, prediction_date) VALUES(%s,%s,%s)",
         (id, risk, str(datetime.now()))
     )
 
@@ -167,6 +218,7 @@ def predict(id):
     return render_template("prediction.html", student=student, risk=risk)
 
 
+# -------- COUNSELLING --------
 @app.route('/counselling/<risk>')
 def counselling(risk):
     if risk == "High Risk":
@@ -183,9 +235,14 @@ def counselling(risk):
     )
 
 
+# -------- HISTORY --------
 @app.route('/history')
 def history():
-    conn = sqlite3.connect("dropout.db")
+    conn = get_db_connection()
+
+    if not conn:
+       return "DB not available"
+
     c = conn.cursor()
 
     c.execute("""
@@ -199,21 +256,26 @@ def history():
     """)
 
     records = c.fetchall()
-
     conn.close()
 
     return render_template("history.html", records=records)
 
 
+# -------- LOGOUT --------
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/')
 
 
+# -------- ADMIN DASHBOARD --------
 @app.route('/admin')
 def admin():
-    conn = sqlite3.connect("dropout.db")
+    conn = get_db_connection()
+
+    if not conn:
+       return "DB not available"
+
     c = conn.cursor()
 
     c.execute("SELECT COUNT(*) FROM students")
@@ -239,5 +301,11 @@ def admin():
     )
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# ---------------- RUN ----------------
+
+
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
