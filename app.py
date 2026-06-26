@@ -15,13 +15,16 @@ app.secret_key = "dropout_project_key"
 def get_db_connection():
     try:
         db_url = os.environ.get("DATABASE_URL")
+
+        print("DATABASE_URL exists:", bool(db_url))
+
         if not db_url:
             raise Exception("DATABASE_URL not set in Render")
 
         return psycopg2.connect(db_url)
 
     except Exception as e:
-        print("DB Connection Error:", e)
+        print(f"DB Connection Error: {repr(e)}")
         return None
 
 # ---------------- INIT DB ----------------
@@ -73,19 +76,6 @@ def safe_init_db():
         print("Database init skipped:", e)
 
 
-
-# ---------------- ROUTES ----------------
-
-@app.route('/')
-def home():
-    return render_template('login.html')
-
-
-@app.route('/register')
-def register():
-    return render_template('register.html')
-
-
 # -------- REGISTER USER --------
 @app.route('/register_user', methods=['POST'])
 def register_user():
@@ -95,12 +85,12 @@ def register_user():
     conn = get_db_connection()
 
     if not conn:
-       return "DB not available"
+        return "DB not available"
 
     c = conn.cursor()
 
     c.execute(
-        "INSERT INTO users(email, password) VALUES(%s, %s)",
+        "INSERT INTO users (email, password) VALUES (%s, %s)",
         (email, password)
     )
 
@@ -108,9 +98,8 @@ def register_user():
     conn.close()
 
     return redirect('/')
+# ---------------- ROUTES ----------------
 
-
-# -------- LOGIN --------
 @app.route('/login', methods=['POST'])
 def login():
     email = request.form['email']
@@ -119,23 +108,24 @@ def login():
     conn = get_db_connection()
 
     if not conn:
-       return "DB not available"
+        return "DB not available"
 
     c = conn.cursor()
+
     c.execute(
         "SELECT * FROM users WHERE email=%s AND password=%s",
         (email, password)
     )
 
     user = c.fetchone()
+
     conn.close()
 
     if user:
         session['user'] = email
         return redirect('/dashboard')
-
-    return "Invalid Email or Password"
-
+    else:
+        return "Invalid email or password"
 
 # -------- DASHBOARD --------
 @app.route('/dashboard')
@@ -307,7 +297,8 @@ def admin():
 
 # ---------------- RUN ----------------
 
-
+# Initialize database tables
+safe_init_db()
 
 if __name__ == "__main__":
     import os
