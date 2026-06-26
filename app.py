@@ -126,6 +126,10 @@ def login():
         return redirect('/dashboard')
     else:
         return "Invalid email or password"
+    
+@app.route('/')
+def home():
+    return render_template('login.html')   
 
 # -------- DASHBOARD --------
 @app.route('/dashboard')
@@ -149,6 +153,7 @@ def dashboard():
         students=students,
         current_date=current_date
     )
+
 
 
 # -------- ADD STUDENT --------
