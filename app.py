@@ -3,7 +3,11 @@ import psycopg2
 import os
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="src/templates",
+    static_folder="src/static"
+ )
 app.secret_key = "dropout_project_key"
 
 
