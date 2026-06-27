@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from  flask import Flask, render_template, request, redirect, session
 import psycopg2
 import os
 from datetime import datetime
@@ -16,15 +16,18 @@ def get_db_connection():
     try:
         db_url = os.environ.get("DATABASE_URL")
 
-        print("DATABASE_URL exists:", bool(db_url))
-
         if not db_url:
-            raise Exception("DATABASE_URL not set in Render")
+            print("DATABASE_URL not set")
+            return None
+
+        # Render fix (VERY IMPORTANT)
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
 
         return psycopg2.connect(db_url)
 
     except Exception as e:
-        print(f"DB Connection Error: {repr(e)}")
+        print("DB Connection Error:", repr(e))
         return None
 
 # ---------------- INIT DB ----------------
